@@ -1,0 +1,20 @@
+
+##
+# Created by Sharif 08.02.2018
+#
+##
+
+
+- hosts:
+  - single-node-sd
+  roles:
+  - redis
+
+  tags:
+  - single-node
+  - redis
+
+
+
+
+

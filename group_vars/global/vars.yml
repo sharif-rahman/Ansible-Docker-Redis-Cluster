@@ -1,0 +1,32 @@
+
+redis:
+################################# Add ip  
+  ip: 
+  image: redis:5.0.0
+  pass: 12345
+  docker:
+    configpath: /usr/local/etc/redis/redis.conf
+
+  cluster:
+    port1: 7001
+    port2: 7002
+    port3: 7003
+    master:
+      node1:                       # Redis-node1 IP
+      node2:                       # Redis-node2 IP
+      node3:                       # Redis-node3 IP
+
+
+
+
+docker:
+  restart_policy: on-failure
+  restart: unless-stopped
+  pull: always
+  state: started
+
+
+
+
+
+

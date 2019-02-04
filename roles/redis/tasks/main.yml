@@ -1,0 +1,68 @@
+
+- include: ./delete-all-data.yml
+
+- name: Configure
+  template: src=redis-m.conf.j2   dest=/etc/redis/redis-{{ MASTER }}.conf mode=0777
+
+
+- name: Configure
+  template: src=redis-s.conf.j2  dest=/etc/redis/redis-{{ SLAVE }}.conf mode=0777
+
+- name: Configure
+  template: src=redis-cli.sh.j2  dest=/etc/redis/redis-cli.sh mode=0777
+  when: inventory_hostname == "redis1"
+
+
+- name: Redis delete
+  shell: docker rm -f redis-{{ MASTER }}
+  ignore_errors: yes
+
+- name: Redis delete
+  docker_container:
+    name: "redis-{{ MASTER }}"
+    state: absent
+  ignore_errors: yes
+
+- name: Redis CLuster
+  shell: docker run -d \
+         --name redis-{{ MASTER }} \
+         --restart {{ docker.restart }} \
+         -v  /redis/redis-{{ MASTER }}:/data \
+         -v /etc/redis/redis-{{ MASTER }}.conf:/usr/local/etc/redis/redis.conf  \
+         -p "{{ MASTER_PORTS }}:{{ MASTER_PORTS }}" \
+         -p "{{ MASTER_PORTS1 }}:{{ MASTER_PORTS1 }}" \
+         {{  redis.image }} redis-server {{ redis.docker.configpath }}
+
+
+- name: Redis delete
+  docker_container:
+    name: "redis-{{ SLAVE }}"
+    state: absent
+  ignore_errors: yes
+
+
+- name: Redis Cluster
+  shell: docker run -d \
+         --name redis-{{ SLAVE }} \
+         --restart {{ docker.restart }} \
+         -v  /redis/redis-{{ SLAVE }}:/data \
+         -v /etc/redis/redis-{{ SLAVE }}.conf:/usr/local/etc/redis/redis.conf \
+         -p "{{ SLAVE_PORTS }}:{{ SLAVE_PORTS }}" \
+         -p "{{ SLAVE_PORTS1 }}:{{ SLAVE_PORTS1 }}" \
+         {{  redis.image }} redis-server /usr/local/etc/redis/redis.conf
+
+- name: Create Cluster
+  docker_container:
+    name: redis-cluster
+    image: redis:5.0.0
+    state: started
+    ports:
+    - "6379:6379"
+    volumes:
+    - /etc/redis/redis-cli.sh:/redis-cli.sh
+    command: [ "sh", "-c", "echo 'yes'  | redis-cli -a 12345 --cluster create  {{ redis.cluster.master.node1 }}:{{ redis.cluster.port1 }} {{ redis.cluster.master.node2 }}:{{ redis.cluster.port$
+  when: inventory_hostname == "redis1"
+
+
+
+

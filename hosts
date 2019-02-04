@@ -1,0 +1,30 @@
+
+
+# --------------- Global Children ------------------- #
+
+[global:children]
+site-a
+
+
+# --------------- Avaiablility Groups --------------- #
+
+[site-a:children]
+single-node
+
+# --------------- Sub Avaiablility Groups ----------- #
+
+[single-node:children]
+single-node-sd
+
+
+
+# -------------- Global Service -------------------- #
+
+[single-node-sd]                                        # Redis Node
+redis1 MASTER=M1 SLAVE=SM3 MASTER_PORTS=7001 SLAVE_PORTS=7003 MASTER_PORTS1=17001 SLAVE_PORTS1=17003 REDIS_IP=redis1
+redis2 MASTER=M2 SLAVE=SM1 MASTER_PORTS=7002 SLAVE_PORTS=7001 MASTER_PORTS1=17002 SLAVE_PORTS1=17001 REDIS_IP=redis2
+redis3 MASTER=M3 SLAVE=SM2 MASTER_PORTS=7003 SLAVE_PORTS=7002 MASTER_PORTS1=17003 SLAVE_PORTS1=17002 REDIS_IP=redis3
+
+
+
+
